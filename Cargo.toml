@@ -4,5 +4,7 @@ description = "Propositional Logic"
 version = "0.1.0-alpha.1"
 edition = "2021"
 repository = "https://github.com/PawelJastrzebski/propositional"
+license = "MIT"
+keywords = ["logic", "propositional-logic"]
 
 [dependencies]

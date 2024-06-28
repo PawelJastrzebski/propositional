@@ -24,9 +24,9 @@ Source: [wikipedia.org](https://en.wikipedia.org/wiki/Propositional_calculus#Arg
 ```rust
 use propositional::prelude::*;
 
-let rain = Symbol("It is raining.");
-let hagrid = Symbol("Harry visited Hagrid.");
-let dumbledore = Symbol("Harry visited Dumbledore.");
+let rain = symbol!("It is raining.");
+let hagrid = symbol!("Harry visited Hagrid.");
+let dumbledore = symbol!("Harry visited Dumbledore.");
 
 let knowledge = and!(
     implies!(not!(rain), hagrid),
