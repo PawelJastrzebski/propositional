@@ -3,8 +3,15 @@ use std::rc::Rc;
 pub trait Sentence: 'static {
     fn eval(&self, model: &Model) -> Option<bool>;
     fn symbols(&self) -> Vec<&Symbol>;
+    fn formula(&self) -> String;
     fn symbols_unique(&self) -> Vec<&Symbol> {
         crate::utils::unique(self.symbols())
+    }
+}
+
+impl std::fmt::Display for dyn Sentence {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
     }
 }
 
@@ -64,11 +71,21 @@ pub struct Symbol {
     label: Rc<String>,
 }
 
+impl std::fmt::Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 impl Symbol {
     pub fn new<S: Into<String>>(label: S) -> Self {
         Self {
             label: Rc::new(label.into()),
         }
+    }
+
+    pub fn name(&self) -> &str {
+        &self.label
     }
 }
 
@@ -91,6 +108,10 @@ impl Sentence for Symbol {
 
     fn symbols(&self) -> Vec<&Symbol> {
         vec![&self]
+    }
+    
+    fn formula(&self) -> String {
+        self.name().to_owned()
     }
 }
 

@@ -26,7 +26,6 @@ pub mod examples {
         );
 
         println!("It is cloudy? {:?}", check(&world, &cloud));
-
         assert_eq!(Some(true), check(&world, &cloud));
     }
 
@@ -42,6 +41,8 @@ pub mod examples {
             not!(and!(hagrid, dumbledore)),
             dumbledore
         );
+
+        println!("{}", knowledge);
 
         println!("It is raining? {:?}", check(&knowledge, &rain));
         assert_eq!(Some(true), check(&knowledge, &rain));

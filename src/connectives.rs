@@ -18,6 +18,12 @@ impl Not {
     }
 }
 
+impl std::fmt::Display for Not {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 pub fn Not<A>(sentence: &A) -> Not
 where
     A: Sentence + Clone,
@@ -38,6 +44,10 @@ impl Sentence for Not {
     fn symbols(&self) -> Vec<&Symbol> {
         self.sentence.symbols()
     }
+
+    fn formula(&self) -> String {
+        format!("¬({})", self.sentence)
+    }
 }
 
 #[macro_export]
@@ -55,6 +65,12 @@ pub struct And {
     sentences: Vec<Rc<dyn Sentence>>,
 }
 
+impl std::fmt::Display for And {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 impl And {
     pub fn new() -> Self {
         Self {
@@ -65,6 +81,10 @@ impl And {
     pub fn And<T: Sentence + Clone>(mut self, sentence: &T) -> Self {
         self.sentences.push(Rc::new(sentence.clone()));
         self
+    }
+
+    pub fn add<T: Sentence + Clone>(&mut self, sentence: &T) {
+        self.sentences.push(Rc::new(sentence.clone()));
     }
 }
 
@@ -84,6 +104,17 @@ impl Sentence for And {
 
     fn symbols(&self) -> Vec<&Symbol> {
         self.sentences.iter().flat_map(|s| s.symbols()).collect()
+    }
+
+    fn formula(&self) -> String {
+        format!(
+            "{}",
+            self.sentences
+                .iter()
+                .map(|f| f.formula())
+                .collect::<Vec<String>>()
+                .join(" ∧ ")
+        )
     }
 }
 
@@ -112,6 +143,12 @@ pub struct Or {
     sentences: Vec<Rc<dyn Sentence>>,
 }
 
+impl std::fmt::Display for Or {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 impl Or {
     pub fn new() -> Self {
         Self {
@@ -122,6 +159,10 @@ impl Or {
     pub fn Or<T: Sentence + Clone>(mut self, sentence: &T) -> Self {
         self.sentences.push(Rc::new(sentence.clone()));
         self
+    }
+
+    pub fn add<T: Sentence + Clone>(&mut self, sentence: &T) {
+        self.sentences.push(Rc::new(sentence.clone()));
     }
 }
 
@@ -141,6 +182,17 @@ impl Sentence for Or {
 
     fn symbols(&self) -> Vec<&Symbol> {
         self.sentences.iter().flat_map(|s| s.symbols()).collect()
+    }
+
+    fn formula(&self) -> String {
+        format!(
+            "({})",
+            self.sentences
+                .iter()
+                .map(|f| f.formula())
+                .collect::<Vec<String>>()
+                .join(" v ")
+        )
     }
 }
 
@@ -170,6 +222,12 @@ pub struct Implies {
     consequent: Rc<dyn Sentence>,
 }
 
+impl std::fmt::Display for Implies {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 impl Sentence for Implies {
     fn eval(&self, model: &Model) -> Option<bool> {
         let Some(left_eval) = self.antecedent.eval(model) else {
@@ -188,6 +246,10 @@ impl Sentence for Implies {
             .into_iter()
             .flat_map(|f| f)
             .collect()
+    }
+
+    fn formula(&self) -> String {
+        format!("{} => {}", self.antecedent, self.consequent)
     }
 }
 
@@ -229,6 +291,12 @@ pub struct Biconditional {
     right: Rc<dyn Sentence>,
 }
 
+impl std::fmt::Display for Biconditional {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.formula())
+    }
+}
+
 impl Sentence for Biconditional {
     fn eval(&self, model: &Model) -> Option<bool> {
         let Some(left_eval) = self.left.eval(model) else {
@@ -247,6 +315,10 @@ impl Sentence for Biconditional {
             .into_iter()
             .flat_map(|f| f)
             .collect()
+    }
+
+    fn formula(&self) -> String {
+        format!("{} <=> {}", self.left, self.right)
     }
 }
 
@@ -298,7 +370,7 @@ pub mod tests {
         let a = symbol!("A");
         let b = symbol!("B");
 
-         // A ∨ B is equivalent to A || B
+        // A ∨ B is equivalent to A || B
         model!(a => false, b => false).assert_false(&or!(a, b));
         model!(a => false, b => true).assert_true(&or!(a, b));
         model!(a => true, b => false).assert_true(&or!(a, b));
@@ -328,7 +400,6 @@ pub mod tests {
         model!(a => true, b => false).assert_false(&implies!(a, b));
         model!(a => true, b => true).assert_true(&implies!(a, b));
     }
-
 
     #[test]
     fn biconditional_true_table() {
